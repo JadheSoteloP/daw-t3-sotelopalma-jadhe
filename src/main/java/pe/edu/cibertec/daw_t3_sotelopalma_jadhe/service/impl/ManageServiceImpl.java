@@ -80,39 +80,51 @@ public class ManageServiceImpl implements ManageService {
 
     @Override
     public boolean deleteCarById(int carId) throws Exception {
-        Optional<Car> optional = carRepository.findById(carId);
-        return optional.map(car -> {
-            carRepository.delete(car);
-            return true;
-        }).orElse(false);
-
+        try {
+            if (carRepository.existsById(carId)) {
+                carRepository.deleteById(carId);
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Exception("A ocurrido un error con la eliminacion: " + e.getMessage());
+        }
     }
 
     @Override
     public boolean addCar(CarDetailDto carDetailDto) throws Exception {
+        try {
+            Optional<Car> optional = carRepository.findById(carDetailDto.carId());
+            if (optional.isPresent()) {
+                return false;
+            } else {
+                Car car = new Car();
+                car.setMake(carDetailDto.make());
+                car.setModel(carDetailDto.model());
+                car.setYear(carDetailDto.year());
+                car.setVin(carDetailDto.vin());
+                car.setLicensePlate(carDetailDto.licensePlate());
+                car.setOwnerName(carDetailDto.ownerName());
+                car.setOwnerContact(carDetailDto.ownerContact());
+                car.setPurchaseDate(carDetailDto.purchaseDate());
+                car.setMileage(carDetailDto.mileage());
+                car.setEngineType(carDetailDto.engineType());
+                car.setColor(carDetailDto.color());
+                car.setInsuranceCompany(carDetailDto.insuranceCompany());
+                car.setInsurancePolicyNumber(carDetailDto.insurancePolicyNumber());
+                car.setRegistrationExpirationDate(new Date());
+                car.setServiceDueDate(new Date());
 
-        Optional<Car> optional = carRepository.findById(carDetailDto.carId());
-        if (optional.isPresent())
-            return false;
-        else {
-            Car car = new Car();
-            car.setMake(carDetailDto.make());
-            car.setModel(carDetailDto.model());
-            car.setYear(carDetailDto.year());
-            car.setVin(carDetailDto.vin());
-            car.setLicensePlate(carDetailDto.licensePlate());
-            car.setOwnerName(carDetailDto.ownerName());
-            car.setOwnerContact(carDetailDto.ownerContact());
-            car.setPurchaseDate(carDetailDto.purchaseDate());
-            car.setMileage(carDetailDto.mileage());
-            car.setEngineType(carDetailDto.engineType());
-            car.setColor(carDetailDto.color());
-            car.setInsuranceCompany(carDetailDto.insuranceCompany());
-            car.setInsurancePolicyNumber(carDetailDto.insurancePolicyNumber());
-            car.setRegistrationExpirationDate(new Date());
-            car.setServiceDueDate(new Date());
-            carRepository.save(car);
-            return true;
+                carRepository.save(car);
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Exception("Error al agregar nuevo carro: " + e.getMessage());
         }
     }
+
+
 }
